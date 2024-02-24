@@ -58,6 +58,7 @@ public class EntitygeneratorApplication implements CommandLineRunner {
 
 			sb.append(".name(\"").append(groupEntity.getLinkEntity().getName()).append("\")").append(lineBreak);
 			sb.append(".build();").append(lineBreak);
+			sb.append("links.add(lintEntity").append(beanCount).append(");").append(lineBreak);
 
 			sb.append("GroupEntity groupEntkity").append(beanCount).append(" = GroupEntity.builder()").append(lineBreak);
 			sb.append(".name(\"").append(groupEntity.getName()).append("\")").append(lineBreak);
