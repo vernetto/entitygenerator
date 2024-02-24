@@ -5,6 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,13 +28,13 @@ public class EntitygeneratorApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		//populateDB();
-		//dumpDb();
+		populateDB();
+		dumpDb();
 		generateEntities();
 
 	}
 
-	private void generateEntities() {
+	private void generateEntities() throws ClassNotFoundException {
 		StringBuilder sb = new StringBuilder();
 		List<GroupEntity> allGroups = groupEntityRepository.findAll();
 		String lineBreak = "\n";
@@ -41,15 +42,27 @@ public class EntitygeneratorApplication implements CommandLineRunner {
 		sb.append("List<LinkEntity> links = new ArrayList();").append(lineBreak);
 		sb.append("List<GroupEntity> groups = new ArrayList();").append(lineBreak);
 		AtomicInteger count = new AtomicInteger(0);
+		Class<?> clazzLinkEntity = Class.forName("org.pierre.entitygenerator.LinkEntity");
+		Class<?> clazzGroupEntity = Class.forName("org.pierre.entitygenerator.GroupEntity");
+		for (Field field : clazzLinkEntity.getDeclaredFields()) {
+			log.info("Link:" + field.getName());
+		}
+		for (Field field : clazzGroupEntity.getDeclaredFields()) {
+			log.info("Group: " + field.getName());
+		}
+
 		allGroups.forEach(groupEntity -> {
 			sb.append(lineBreak);
-			sb.append("LinkEntity lintEntity").append(count.get()).append(" = LinkEntity.builder()").append(lineBreak);
+			int beanCount = count.get();
+			sb.append("LinkEntity lintEntity").append(beanCount).append(" = LinkEntity.builder()").append(lineBreak);
+
 			sb.append(".name(\"").append(groupEntity.getLinkEntity().getName()).append("\")").append(lineBreak);
 			sb.append(".build();").append(lineBreak);
 
-			sb.append("groups.add(GroupEntity.builder()").append(lineBreak);
+			sb.append("GroupEntity groupEntkity").append(beanCount).append(" = GroupEntity.builder()").append(lineBreak);
 			sb.append(".name(\"").append(groupEntity.getName()).append("\")").append(lineBreak);
-			sb.append(".linkEntity(lintEntity").append(count.get()).append(").build());").append(lineBreak);
+			sb.append(".linkEntity(lintEntity").append(beanCount).append(").build());").append(lineBreak);
+			sb.append("groups.add(groupEntity").append(beanCount).append(");").append(lineBreak);
 			count.getAndIncrement();
 
 		});
@@ -85,11 +98,5 @@ public class EntitygeneratorApplication implements CommandLineRunner {
 				.name("oneGroup")
 				.linkEntity(lintEntity0).build());
 
-		LinkEntity lintEntity1 = LinkEntity.builder()
-				.name("one")
-				.build();
-		groups.add(GroupEntity.builder()
-				.name("oneGroup")
-				.linkEntity(lintEntity1).build());
 	}
 }
